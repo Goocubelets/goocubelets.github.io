@@ -1,0 +1,335 @@
+body {
+  background: url("homepageback.jpg") no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+.titleft{
+  float: left;
+  width: 15%;
+  margin-top: 50px;
+}
+
+.titright{
+  float: right;
+  width: 15%;
+  margin-top: 50px;
+}
+
+.flip-horizontally {
+  transform: scaleX(-1);
+}
+
+.title {
+  float: center;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  font-family: 'Times New Roman', serif;
+  font-size: 32pt;
+  color: white;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 40%;
+  padding: 20px;
+  background-image: url("title cover.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  border: solid;
+  border-color: white;
+  text-align: center;
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+.left {
+  float: left;
+  text-align: center;
+  padding: 10px;
+  color: white;
+  width: 17%;
+  margin-top: 0px;
+  margin-left: 75px;
+}
+.asuka{
+  background-image: url("ezgif-7-12083fe516.gif");
+  background-size: cover;
+  background-repeat: no-repeat;
+  border: solid;
+  border-color: CornflowerBlue;
+  height: 350px;
+  font-family: Fantasy;
+  color: white;
+  margin-top: 25px;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  }
+
+.intro{
+  background-image: url("photo-1641895958846-19dab3471449.jpg");
+  padding: 15px;
+  width: 45%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 100px;
+  text-align: center;
+  background-size: 100%;
+  background-repeat: repeat;
+  border: solid;
+  border-color: blue;
+  color: white;
+}
+
+.bio{
+  background-image: url("photo-1641895958846-19dab3471449.jpg");
+  padding: 15px;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 100px;
+  text-align: center;
+  background-size: 100%;
+  background-repeat: repeat;
+  border: solid;
+  border-color: blue;
+  color: white;
+}
+
+.right {
+  float: right;
+  text-align: center;
+  padding: 10px;
+  color: white;
+  width: 17%;
+  margin-top: 0px;
+  margin-right: 75px;
+}
+
+.right .twtlinks{
+  background-image: url("asdsadsada.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  border: solid;
+  border-color: purple;
+  height: 350px;
+  font-family: Fantasy;
+  color: white;
+  margin-top: 25px;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+.links{
+  margin-top: 75px;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  background-image: url("darkenedddd.png");
+  background-size: cover;
+  background-repeat: repeat;
+  border: solid;
+  border-color: brown;
+  height: 364px;
+  color: white;
+  text-align: center;
+}
+
+.overlay{
+  display: block; 
+  width: 100%;
+  height: 100%;
+}
+
+.articles1{
+  background-color:white;
+  padding: 15px;
+  width: 65%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 100px;
+  text-align: center;
+  background-size: 100%;
+  background-repeat: repeat;
+  border: solid;
+  border-color: black;
+  color: black;
+  font-size: 12pt;
+  line-height:1.5;
+}
+.articles2{
+  background-color:white;
+  padding: 15px;
+  width: 65%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 100px;
+  text-align: center;
+  background-size: 100%;
+  background-repeat: repeat;
+  border: solid;
+  border-color: black;
+  color: black;
+  font-size: 12pt;
+  line-height:1.5;
+}
+.center {
+padding: 125px 0;
+}
+
+a:link {
+  color: white;
+  background-color: transparent;
+  text-decoration: none;
+}
+a:visited {
+  color: white;
+  background-color: transparent;
+  text-decoration: none;
+}
+a:hover {
+  color: Gainsboro;
+  background-color: transparent;
+  text-decoration: underline;
+}
+/* Q&A Section Styling */
+.qa-container {
+  max-width: 700px;
+  margin: 40px auto;
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid #ffffff88;
+  border-radius: 12px;
+  font-family: 'Times New Roman', serif;
+  color: white;
+  padding: 20px;
+  backdrop-filter: blur(3px);
+}
+
+.qa-header h1, .qa-header p,
+label, .tab, .tool-btn, .submit-btn {
+  font-family: 'Times New Roman', serif;
+  color: white;
+  text-shadow: 0 0 3px black;
+}
+
+.tabs {
+  display: flex;
+  margin-top: 10px;
+  border-bottom: 1px solid white;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: white;
+  border-bottom: 2px solid transparent;
+}
+
+.tab.active {
+  border-bottom: 2px solid white;
+  font-weight: bold;
+}
+
+.tab-content {
+  display: none;
+  padding: 20px;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+textarea {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: 1px solid white;
+}
+
+.submit-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid white;
+}
+
+.submit-btn:hover {
+  background: white;
+  color: black;
+}
+
+.canvas-tools,
+.canvas-container {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid white;
+}
+
+.tool-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid white;
+  color: white;
+}
+
+.tool-btn.active {
+  background: white;
+  color: black;
+}
+
+.success-message {
+  background: rgba(0, 128, 0, 0.4);
+  border: 1px solid #0f0;
+  color: #cfc;
+  text-shadow: none;
+}
+
+.admin-link {
+  display: block;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid white;
+  padding: 8px 12px;
+  margin-top: 20px;
+  text-align: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  font-size: 0.9em;
+  text-decoration: none;
+  color: white;
+}
+
+.admin-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  text-decoration: none;
+}
+
+.imagescroll {
+  height: 819px;
+  background-image: url("photo-1641895958846-19dab3471449.jpg");
+  background-size: cover;
+  margin-top: 25px;
+  background-repeat: no-repeat;
+  border: solid;
+  border-color: CornflowerBlue;
+  overflow: hidden;
+}
+
+.scroll-container {
+  height: 100%;
+  overflow: hidden;
+}
+
+.scroll-content {
+  animation: scroll-down 30s linear infinite;
+}
+
+.scroll-content img {
+  display: block;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  vertical-align: top;
+}
+
+@keyframes scroll-down {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
