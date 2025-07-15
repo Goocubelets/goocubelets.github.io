@@ -271,10 +271,16 @@ textarea {
 }
 
 .success-message {
+  display: none;
   background: rgba(0, 128, 0, 0.4);
   border: 1px solid #0f0;
   color: #cfc;
   text-shadow: none;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: bold;
 }
 
 .admin-link {
