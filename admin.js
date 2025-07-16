@@ -1,12 +1,15 @@
-// Updated admin.js with Firebase v9+ modular SDK and better error handling
+// Updated admin.js with Firebase v9+ modular SDK and Hall of Fame functionality
 class AdminPanel {
   constructor() {
     this.ADMIN_PASSWORD_HASH = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9";
     this.database = null;
     this.submissionsRef = null;
+    this.halloffameRef = null;
     this.submissionsListener = null;
+    this.halloffameListener = null;
     this.firebaseUtils = null;
     this.firebaseReady = false;
+    this.currentTab = 'submissions';
     
     this.initializeFirebase();
     this.initializeEventListeners();
@@ -19,7 +22,7 @@ class AdminPanel {
       
       // Import Firebase modules
       const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js");
-      const { getDatabase, ref, push, onValue, remove, off, get } = await import("https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js");
+      const { getDatabase, ref, push, onValue, remove, off, get, set } = await import("https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js");
       const { getAnalytics } = await import("https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js");
       
       // Your Firebase configuration
@@ -46,10 +49,12 @@ class AdminPanel {
         onValue,
         remove,
         off,
-        get
+        get,
+        set
       };
       
       this.submissionsRef = ref(this.database, 'submissions');
+      this.halloffameRef = ref(this.database, 'halloffame');
       this.firebaseReady = true;
       
       console.log('Firebase initialized successfully in admin panel');
@@ -75,6 +80,32 @@ class AdminPanel {
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
       loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+    }
+  }
+
+  // Tab switching functionality
+  showTab(tabName) {
+    this.currentTab = tabName;
+    
+    // Update tab buttons
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    
+    const activeTabBtn = document.querySelector(`[onclick="adminPanel.showTab('${tabName}')"]`);
+    if (activeTabBtn) activeTabBtn.classList.add('active');
+    
+    // Update tab content
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => content.classList.remove('active'));
+    
+    const activeTabContent = document.getElementById(`${tabName}Tab`);
+    if (activeTabContent) activeTabContent.classList.add('active');
+    
+    // Load appropriate data
+    if (tabName === 'submissions') {
+      this.loadSubmissions();
+    } else if (tabName === 'halloffame') {
+      this.loadHallOfFame();
     }
   }
 
@@ -120,8 +151,8 @@ class AdminPanel {
     if (adminContent) adminContent.style.display = 'block';
     
     console.log('Admin panel shown, loading submissions...');
-    this.loadSubmissions();
-    this.setupRealtimeListener();
+    this.showTab('submissions'); // Start with submissions tab
+    this.setupRealtimeListeners();
   }
 
   // Show login error message
@@ -151,29 +182,46 @@ class AdminPanel {
     if (adminContent) adminContent.style.display = 'none';
     if (passwordInput) passwordInput.value = '';
     
-    // Remove the real-time listener
+    // Remove the real-time listeners
     if (this.submissionsListener && this.firebaseUtils && this.submissionsRef) {
       this.firebaseUtils.off(this.submissionsRef, 'value', this.submissionsListener);
       this.submissionsListener = null;
+    }
+    if (this.halloffameListener && this.firebaseUtils && this.halloffameRef) {
+      this.firebaseUtils.off(this.halloffameRef, 'value', this.halloffameListener);
+      this.halloffameListener = null;
     }
     
     console.log('Logged out');
   }
 
-  // Setup real-time listener for new submissions
-  setupRealtimeListener() {
+  // Setup real-time listeners for both submissions and hall of fame
+  setupRealtimeListeners() {
     if (!this.firebaseReady || !this.database || !this.firebaseUtils) {
-      console.error('Firebase not ready, cannot setup real-time listener');
+      console.error('Firebase not ready, cannot setup real-time listeners');
       return;
     }
 
-    console.log('Setting up real-time listener...');
+    console.log('Setting up real-time listeners...');
     
+    // Submissions listener
     this.submissionsListener = this.firebaseUtils.onValue(this.submissionsRef, (snapshot) => {
-      console.log('Real-time update received:', snapshot.val());
-      this.renderSubmissions(snapshot.val());
+      console.log('Submissions real-time update received:', snapshot.val());
+      if (this.currentTab === 'submissions') {
+        this.renderSubmissions(snapshot.val());
+      }
     }, (error) => {
-      console.error('Real-time listener error:', error);
+      console.error('Submissions real-time listener error:', error);
+    });
+
+    // Hall of Fame listener
+    this.halloffameListener = this.firebaseUtils.onValue(this.halloffameRef, (snapshot) => {
+      console.log('Hall of Fame real-time update received:', snapshot.val());
+      if (this.currentTab === 'halloffame') {
+        this.renderHallOfFame(snapshot.val());
+      }
+    }, (error) => {
+      console.error('Hall of Fame real-time listener error:', error);
     });
   }
 
@@ -195,8 +243,28 @@ class AdminPanel {
       })
       .catch((error) => {
         console.error('Error loading submissions from Firebase:', error);
-        // Fallback to localStorage
         this.loadLocalSubmissions();
+      });
+  }
+
+  // Load Hall of Fame from Firebase
+  loadHallOfFame() {
+    if (!this.firebaseReady || !this.database || !this.firebaseUtils) {
+      console.error('Firebase not ready for Hall of Fame');
+      return;
+    }
+
+    console.log('Loading Hall of Fame from Firebase...');
+    
+    this.firebaseUtils.get(this.halloffameRef)
+      .then((snapshot) => {
+        const data = snapshot.val();
+        console.log('Loaded Hall of Fame from Firebase:', data);
+        this.renderHallOfFame(data);
+      })
+      .catch((error) => {
+        console.error('Error loading Hall of Fame from Firebase:', error);
+        this.renderHallOfFame(null);
       });
   }
 
@@ -252,6 +320,40 @@ class AdminPanel {
     submissionsList.innerHTML = submissions.map(submission => this.renderSubmission(submission)).join('');
   }
 
+  // Render Hall of Fame from Firebase data
+  renderHallOfFame(halloffameData) {
+    const halloffameList = document.getElementById('halloffameList');
+    const halloffameCount = document.getElementById('halloffameCount');
+    
+    if (!halloffameList || !halloffameCount) {
+      console.error('Hall of Fame display elements not found');
+      return;
+    }
+    
+    console.log('Rendering Hall of Fame:', halloffameData);
+    
+    if (!halloffameData || Object.keys(halloffameData).length === 0) {
+      halloffameCount.textContent = '0 featured drawings';
+      halloffameList.innerHTML = '<div class="no-submissions">No featured drawings yet.</div>';
+      return;
+    }
+
+    // Convert Firebase object to array
+    const halloffameItems = Object.entries(halloffameData).map(([firebaseId, item]) => ({
+      ...item,
+      firebaseId: firebaseId
+    }));
+
+    console.log('Processed Hall of Fame array:', halloffameItems);
+
+    halloffameCount.textContent = `${halloffameItems.length} featured drawing${halloffameItems.length !== 1 ? 's' : ''}`;
+    
+    // Sort by when added to hall of fame (newest first)
+    halloffameItems.sort((a, b) => b.addedToHallOfFame - a.addedToHallOfFame);
+    
+    halloffameList.innerHTML = halloffameItems.map(item => this.renderHallOfFameItem(item)).join('');
+  }
+
   // Render individual submission
   renderSubmission(submission) {
     let contentHtml = '';
@@ -273,6 +375,10 @@ class AdminPanel {
       `;
     }
     
+    // Add "Add to Hall of Fame" button for drawings
+    const hallOfFameButton = submission.type === 'drawing' ? 
+      `<button class="halloffame-btn" onclick="adminPanel.addToHallOfFame('${submission.firebaseId}')">Add to Hall of Fame</button>` : '';
+    
     return `
       <div class="submission-item">
         <div class="submission-header">
@@ -281,12 +387,104 @@ class AdminPanel {
           </div>
           <div>
             <span class="submission-timestamp">${submission.timestamp}</span>
+            ${hallOfFameButton}
             <button class="delete-btn" onclick="adminPanel.deleteSubmission('${submission.firebaseId}')">Delete</button>
           </div>
         </div>
         ${contentHtml}
       </div>
     `;
+  }
+
+  // Render individual Hall of Fame item
+  renderHallOfFameItem(item) {
+    return `
+      <div class="submission-item">
+        <div class="submission-header">
+          <div>
+            <span class="submission-type drawing">featured drawing</span>
+          </div>
+          <div>
+            <span class="submission-timestamp">Added: ${new Date(item.addedToHallOfFame).toLocaleString()}</span>
+            <button class="delete-btn" onclick="adminPanel.removeFromHallOfFame('${item.firebaseId}')">Remove</button>
+          </div>
+        </div>
+        <div class="submission-content">
+          <div class="submission-drawing">
+            <img src="${item.drawing}" alt="Featured drawing">
+          </div>
+          ${item.content ? `<div class="submission-text">${this.escapeHtml(item.content)}</div>` : ''}
+          <div class="submission-text"><strong>Original submission:</strong> ${item.timestamp}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Add drawing to Hall of Fame
+  addToHallOfFame(firebaseId) {
+    if (!this.firebaseReady || !this.database || !this.firebaseUtils) {
+      console.error('Firebase not ready, cannot add to Hall of Fame');
+      return;
+    }
+
+    console.log('Adding to Hall of Fame:', firebaseId);
+    
+    // First, get the submission data
+    const submissionRef = this.firebaseUtils.ref(this.database, `submissions/${firebaseId}`);
+    this.firebaseUtils.get(submissionRef)
+      .then((snapshot) => {
+        const submission = snapshot.val();
+        if (!submission) {
+          alert('Submission not found');
+          return;
+        }
+        
+        if (submission.type !== 'drawing') {
+          alert('Only drawings can be added to Hall of Fame');
+          return;
+        }
+        
+        // Create hall of fame entry
+        const hallOfFameEntry = {
+          ...submission,
+          addedToHallOfFame: Date.now(),
+          originalSubmissionId: firebaseId
+        };
+        
+        // Add to hall of fame
+        const hallOfFameRef = this.firebaseUtils.ref(this.database, `halloffame/${firebaseId}`);
+        return this.firebaseUtils.set(hallOfFameRef, hallOfFameEntry);
+      })
+      .then(() => {
+        console.log('Successfully added to Hall of Fame');
+        alert('Drawing added to Hall of Fame!');
+      })
+      .catch((error) => {
+        console.error('Error adding to Hall of Fame:', error);
+        alert('Error adding to Hall of Fame. Please try again.');
+      });
+  }
+
+  // Remove drawing from Hall of Fame
+  removeFromHallOfFame(firebaseId) {
+    if (!this.firebaseReady || !this.database || !this.firebaseUtils) {
+      console.error('Firebase not ready, cannot remove from Hall of Fame');
+      return;
+    }
+
+    if (confirm('Are you sure you want to remove this drawing from Hall of Fame?')) {
+      console.log('Removing from Hall of Fame:', firebaseId);
+      
+      const hallOfFameRef = this.firebaseUtils.ref(this.database, `halloffame/${firebaseId}`);
+      this.firebaseUtils.remove(hallOfFameRef)
+        .then(() => {
+          console.log('Successfully removed from Hall of Fame');
+        })
+        .catch((error) => {
+          console.error('Error removing from Hall of Fame:', error);
+          alert('Error removing from Hall of Fame. Please try again.');
+        });
+    }
   }
 
   // Delete individual submission from Firebase
@@ -303,6 +501,13 @@ class AdminPanel {
       this.firebaseUtils.remove(submissionRef)
         .then(() => {
           console.log('Submission deleted from Firebase');
+          
+          // Also remove from hall of fame if it exists there
+          const hallOfFameRef = this.firebaseUtils.ref(this.database, `halloffame/${firebaseId}`);
+          return this.firebaseUtils.remove(hallOfFameRef);
+        })
+        .then(() => {
+          console.log('Also removed from Hall of Fame if it existed there');
         })
         .catch((error) => {
           console.error('Error deleting submission:', error);
@@ -332,6 +537,27 @@ class AdminPanel {
     }
   }
 
+  // Clear all Hall of Fame entries
+  clearAllHallOfFame() {
+    if (!this.firebaseReady || !this.database || !this.firebaseUtils) {
+      console.error('Firebase not ready, cannot clear Hall of Fame');
+      return;
+    }
+
+    if (confirm('Are you sure you want to delete ALL Hall of Fame entries? This cannot be undone.')) {
+      console.log('Clearing all Hall of Fame entries...');
+      
+      this.firebaseUtils.remove(this.halloffameRef)
+        .then(() => {
+          console.log('All Hall of Fame entries deleted from Firebase');
+        })
+        .catch((error) => {
+          console.error('Error clearing Hall of Fame:', error);
+          alert('Error clearing Hall of Fame. Please try again.');
+        });
+    }
+  }
+
   // Escape HTML to prevent XSS
   escapeHtml(text) {
     const div = document.createElement('div');
@@ -345,6 +571,8 @@ class AdminPanel {
     console.log('Database:', this.database);
     console.log('Firebase Utils:', this.firebaseUtils);
     console.log('Submissions Ref:', this.submissionsRef);
+    console.log('Hall of Fame Ref:', this.halloffameRef);
+    console.log('Current Tab:', this.currentTab);
   }
 }
 
@@ -358,6 +586,10 @@ function logout() {
 
 function clearAllSubmissions() {
   adminPanel.clearAllSubmissions();
+}
+
+function clearAllHallOfFame() {
+  adminPanel.clearAllHallOfFame();
 }
 
 // Debug function

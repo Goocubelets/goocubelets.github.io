@@ -1,5 +1,6 @@
-// Updated script.js with Firebase v9+ modular SDK and better error handling
+// Updated script.js with Firebase v9+ modular SDK and Hall of Fame functionality
 let submissions = [];
+let hallOfFameEntries = [];
 let currentTool = 'brush';
 let isDrawing = false;
 let lastX = 0;
@@ -48,6 +49,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     firebaseReady = true;
     console.log('Firebase initialized successfully');
     
+    // Initialize Hall of Fame after Firebase is ready
+    initializeHallOfFame();
+    
     // Test Firebase connection
     const testRef = window.firebaseUtils.ref(database, 'test');
     window.firebaseUtils.push(testRef, { message: 'Firebase connection test', timestamp: Date.now() })
@@ -64,6 +68,86 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+// Hall of Fame functionality
+function initializeHallOfFame() {
+  if (!firebaseReady || !database || !window.firebaseUtils) {
+    console.warn('Firebase not ready for Hall of Fame initialization');
+    return;
+  }
+
+  // Load Hall of Fame entries from Firebase
+  const hallOfFameRef = window.firebaseUtils.ref(database, 'halloffame');
+  
+  window.firebaseUtils.onValue(hallOfFameRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      hallOfFameEntries = Object.keys(data).map(key => ({
+        id: key,
+        ...data[key]
+      }));
+      
+      // Sort by date added to Hall of Fame (newest first)
+      hallOfFameEntries.sort((a, b) => {
+        const timeA = a.addedToHallOfFame || 0;
+        const timeB = b.addedToHallOfFame || 0;
+        return timeB - timeA;
+      });
+      
+      renderHallOfFame();
+    } else {
+      hallOfFameEntries = [];
+      renderHallOfFame();
+    }
+  }, (error) => {
+    console.error('Error loading Hall of Fame:', error);
+  });
+}
+
+function renderHallOfFame() {
+  const hallOfFameGrid = document.getElementById('halloffameGrid');
+  const noDrawings = document.getElementById('noDrawings');
+  
+  if (!hallOfFameGrid || !noDrawings) return;
+  
+  if (hallOfFameEntries.length === 0) {
+    hallOfFameGrid.innerHTML = '';
+    noDrawings.style.display = 'block';
+    return;
+  }
+  
+  noDrawings.style.display = 'none';
+  
+  const itemsHTML = hallOfFameEntries.map(entry => {
+    const originalDate = new Date(entry.timestamp).toLocaleDateString();
+    const addedDate = entry.addedToHallOfFame ? 
+      new Date(entry.addedToHallOfFame).toLocaleDateString() : 
+      'Unknown';
+    
+    return `
+      <div class="halloffame-item">
+        <div class="halloffame-drawing-container">
+          <img src="${entry.drawing}" alt="Featured drawing" class="halloffame-drawing">
+        </div>
+        <div class="halloffame-content">
+          ${entry.content ? `<div class="halloffame-text">"${escapeHtml(entry.content)}"</div>` : ''}
+          <div class="halloffame-meta">
+            <div class="halloffame-date">Originally submitted: ${originalDate}</div>
+            <div class="halloffame-featured">Featured: ${addedDate}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  hallOfFameGrid.innerHTML = itemsHTML;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 const canvas = document.getElementById('drawingCanvas');
 const ctx = canvas.getContext('2d');
 const colorPicker = document.getElementById('colorPicker');
@@ -72,14 +156,17 @@ const brushSizeValue = document.getElementById('brushSizeValue');
 const undoBtn = document.getElementById('undoBtn');
 
 // Initialize canvas
-ctx.lineCap = 'round';
-ctx.lineJoin = 'round';
-ctx.fillStyle = 'white';
-ctx.fillRect(0, 0, canvas.width, canvas.height);
-saveState();
+if (canvas) {
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  saveState();
+}
 
 // Canvas history management
 function saveState() {
+  if (!canvas) return;
   historyStep++;
   if (historyStep < canvasHistory.length) canvasHistory.length = historyStep;
   canvasHistory.push(canvas.toDataURL());
@@ -91,25 +178,26 @@ function saveState() {
 }
 
 function undoDrawing() {
-  if (historyStep > 0) {
-    historyStep--;
-    const img = new Image();
-    img.onload = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0);
-    };
-    img.src = canvasHistory[historyStep];
-    updateUndoButton();
-  }
+  if (!canvas || historyStep <= 0) return;
+  historyStep--;
+  const img = new Image();
+  img.onload = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+  };
+  img.src = canvasHistory[historyStep];
+  updateUndoButton();
 }
 
 function updateUndoButton() {
-  undoBtn.disabled = historyStep <= 0;
+  if (undoBtn) {
+    undoBtn.disabled = historyStep <= 0;
+  }
 }
 
 // Drawing functions
 function draw(e) {
-  if (!isDrawing) return;
+  if (!isDrawing || !canvas) return;
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
   const scaleY = canvas.height / rect.height;
@@ -122,12 +210,12 @@ function draw(e) {
 
   if (currentTool === 'brush') {
     ctx.globalCompositeOperation = 'source-over';
-    ctx.strokeStyle = colorPicker.value;
+    ctx.strokeStyle = colorPicker ? colorPicker.value : '#000000';
   } else {
     ctx.globalCompositeOperation = 'destination-out';
   }
 
-  ctx.lineWidth = brushSize.value;
+  ctx.lineWidth = brushSize ? brushSize.value : 3;
   ctx.stroke();
 
   lastX = x;
@@ -135,6 +223,7 @@ function draw(e) {
 }
 
 function startDrawing(e) {
+  if (!canvas) return;
   isDrawing = true;
   const rect = canvas.getBoundingClientRect();
   lastX = (e.clientX - rect.left) * (canvas.width / rect.width);
@@ -149,37 +238,43 @@ function stopDrawing() {
 }
 
 // Event listeners for drawing
-canvas.addEventListener('mousedown', startDrawing);
-canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('mouseup', stopDrawing);
-canvas.addEventListener('mouseout', stopDrawing);
+if (canvas) {
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mouseout', stopDrawing);
 
-// Touch events for mobile
-canvas.addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  const touch = e.touches[0];
-  canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: touch.clientX, clientY: touch.clientY }));
-});
+  // Touch events for mobile
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: touch.clientX, clientY: touch.clientY }));
+  });
 
-canvas.addEventListener('touchmove', (e) => {
-  e.preventDefault();
-  const touch = e.touches[0];
-  canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: touch.clientX, clientY: touch.clientY }));
-});
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: touch.clientX, clientY: touch.clientY }));
+  });
 
-canvas.addEventListener('touchend', (e) => {
-  e.preventDefault();
-  canvas.dispatchEvent(new MouseEvent('mouseup'));
-});
+  canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    canvas.dispatchEvent(new MouseEvent('mouseup'));
+  });
+}
 
 // Tool management
 function setTool(tool) {
   currentTool = tool;
   document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
-  document.getElementById(tool + 'Tool').classList.add('active');
+  const toolBtn = document.getElementById(tool + 'Tool');
+  if (toolBtn) {
+    toolBtn.classList.add('active');
+  }
 }
 
 function clearCanvas() {
+  if (!canvas) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -191,7 +286,10 @@ function switchTab(tabName) {
   document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
   event.target.classList.add('active');
-  document.getElementById(tabName + '-tab').classList.add('active');
+  const tabContent = document.getElementById(tabName + '-tab');
+  if (tabContent) {
+    tabContent.classList.add('active');
+  }
 }
 
 // Updated submission management with Firebase v9+ and better error handling
@@ -278,21 +376,23 @@ if (drawingForm) {
     e.preventDefault();
     const messageInput = document.getElementById('drawingMessage');
     const message = messageInput.value.trim();
-    const dataURL = canvas.toDataURL();
+    const dataURL = canvas ? canvas.toDataURL() : '';
     
-    const submission = {
-      id: Date.now(),
-      type: 'drawing',
-      content: message,
-      drawing: dataURL,
-      timestamp: new Date().toLocaleString()
-    };
-    
-    console.log('Submitting drawing:', submission);
-    saveSubmission(submission);
-    messageInput.value = '';
-    clearCanvas();
-    showSuccessMessage('drawing-success');
+    if (dataURL) {
+      const submission = {
+        id: Date.now(),
+        type: 'drawing',
+        content: message,
+        drawing: dataURL,
+        timestamp: new Date().toLocaleString()
+      };
+      
+      console.log('Submitting drawing:', submission);
+      saveSubmission(submission);
+      messageInput.value = '';
+      clearCanvas();
+      showSuccessMessage('drawing-success');
+    }
   });
 }
 
@@ -312,4 +412,11 @@ window.checkFirebaseStatus = function() {
   console.log('Firebase Ready:', firebaseReady);
   console.log('Database:', database);
   console.log('Firebase Utils:', window.firebaseUtils);
+  console.log('Hall of Fame Entries:', hallOfFameEntries);
 };
+
+// Make functions available globally
+window.switchTab = switchTab;
+window.setTool = setTool;
+window.undoDrawing = undoDrawing;
+window.clearCanvas = clearCanvas;
