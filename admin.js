@@ -403,10 +403,9 @@ createQuestionImage(questionText) {
         lines.push(currentLine);
       }
       
-      // Calculate starting position for centered text
+      // Calculate starting position
       const lineHeight = 35;
-      const totalTextHeight = lines.length * lineHeight;
-      const startY = textAreaTop + (textAreaHeight - totalTextHeight) / 2; // Center vertically
+      const startY = textAreaTop + 240;
       const centerX = textAreaLeft + (textAreaWidth / 2);
       
       // Draw text shadow
