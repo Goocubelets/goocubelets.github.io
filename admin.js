@@ -1,4 +1,4 @@
-// Updated admin.js with Firebase v9+ modular SDK and Hall of Fame functionality
+// Updated admin.js with Firebase v9+ modular SDK, Hall of Fame, and Twitter/X response functionality
 class AdminPanel {
   constructor() {
     this.ADMIN_PASSWORD_HASH = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9";
@@ -354,6 +354,256 @@ class AdminPanel {
     halloffameList.innerHTML = halloffameItems.map(item => this.renderHallOfFameItem(item)).join('');
   }
 
+// Improved createQuestionImage function with better error handling and fallback
+createQuestionImage(questionText) {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas size to match quote.png dimensions
+    canvas.width = 1161;
+    canvas.height = 669;
+    
+    // Function to render text (used for both background and fallback)
+    const renderText = () => {
+      // Define the text area boundaries (same as original)
+      const textAreaLeft = 182;
+      const textAreaTop = 127;
+      const textAreaRight = 686;
+      const textAreaBottom = 551;
+      const textAreaWidth = textAreaRight - textAreaLeft;
+      
+      // Text styling
+      ctx.font = 'bold 28px "Times New Roman", serif';
+      ctx.fillStyle = 'black';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      
+      // Add text shadow
+      const shadowOffsetX = 2;
+      const shadowOffsetY = 2;
+      
+      // Word wrap the question text
+      const words = questionText.split(' ');
+      const lines = [];
+      let currentLine = '';
+      const maxWidth = textAreaWidth - 40;
+      
+      words.forEach(word => {
+        const testLine = currentLine + (currentLine ? ' ' : '') + word;
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      });
+      if (currentLine) {
+        lines.push(currentLine);
+      }
+      
+      // Calculate starting position
+      const lineHeight = 35;
+      const startY = textAreaTop + 20;
+      const centerX = textAreaLeft + (textAreaWidth / 2);
+      
+      // Draw text shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      lines.forEach((line, index) => {
+        ctx.fillText(line, centerX + shadowOffsetX, startY + (index * lineHeight) + shadowOffsetY);
+      });
+      
+      // Draw main text
+      ctx.fillStyle = 'black';
+      lines.forEach((line, index) => {
+        ctx.fillText(line, centerX, startY + (index * lineHeight));
+      });
+      
+      // Add site branding
+      ctx.font = 'italic 18px "Times New Roman", serif';
+      const brandingY = textAreaBottom - 30;
+      
+      // Draw branding shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.fillText('goocubelets.github.io', centerX + shadowOffsetX, brandingY + shadowOffsetY);
+      
+      // Draw branding text
+      ctx.fillStyle = 'black';
+      ctx.fillText('goocubelets.github.io', centerX, brandingY);
+    };
+    
+    // Load the quote.png background image
+    const backgroundImg = new Image();
+    
+    // Set a timeout to prevent hanging on slow/failed image loads
+    const imageTimeout = setTimeout(() => {
+      console.warn('Image loading timeout, using fallback background');
+      createFallbackAndResolve();
+    }, 5000); // 5 second timeout
+    
+    const createFallbackAndResolve = () => {
+      // Clear any existing content
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Create a gradient background as fallback
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, '#f8f9fa');
+      gradient.addColorStop(1, '#e9ecef');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Add a subtle border
+      ctx.strokeStyle = '#dee2e6';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+      
+      // Render text
+      renderText();
+      
+      // Convert to blob and resolve
+      canvas.toBlob((blob) => {
+        resolve(blob);
+      }, 'image/png', 0.9);
+    };
+    
+    backgroundImg.onload = () => {
+      clearTimeout(imageTimeout);
+      try {
+        // Draw the background image
+        ctx.drawImage(backgroundImg, 0, 0, 1161, 669);
+        
+        // Render text on top
+        renderText();
+        
+        // Convert canvas to blob
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, 'image/png', 0.9);
+      } catch (error) {
+        console.error('Error drawing image:', error);
+        createFallbackAndResolve();
+      }
+    };
+    
+    backgroundImg.onerror = () => {
+      clearTimeout(imageTimeout);
+      console.error('Failed to load quote.png background image');
+      createFallbackAndResolve();
+    };
+    
+    // Try to load the image
+    // Use relative path for GitHub Pages compatibility
+    backgroundImg.crossOrigin = 'anonymous';
+    backgroundImg.src = './quote.png'; // Using relative path
+  });
+}
+  // Generate Twitter/X post for question
+  async generateTwitterPost(firebaseId, questionText) {
+    try {
+      console.log('Generating Twitter post for question:', questionText);
+      
+      // Create image blob
+      const imageBlob = await this.createQuestionImage(questionText);
+      
+      // Create downloadable image
+      const url = URL.createObjectURL(imageBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `question-${firebaseId}.png`;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up URL
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+      
+      // Prepare Twitter post text
+      const tweetText = `Answering an anonymous question from my site! 🤔✨\n\ngoocubelets.github.io`;
+      
+      // Create Twitter Web Intent URL
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+      
+      // Show modal with instructions
+      this.showTwitterModal(twitterUrl, questionText);
+      
+    } catch (error) {
+      console.error('Error generating Twitter post:', error);
+      alert('Error generating Twitter post. Please try again.');
+    }
+  }
+
+  // Show Twitter posting modal with instructions
+  showTwitterModal(twitterUrl, questionText) {
+    // Remove existing modal if present
+    const existingModal = document.getElementById('twitterModal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+    
+    // Create modal
+    const modal = document.createElement('div');
+    modal.id = 'twitterModal';
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    `;
+    
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+    `;
+    
+    modalContent.innerHTML = `
+      <h3 style="margin-bottom: 20px; color: #1da1f2;">📱 Post to Twitter/X</h3>
+      <p style="margin-bottom: 20px; line-height: 1.5;">
+        <strong>Steps to post:</strong><br>
+        1. The question image has been downloaded to your computer<br>
+        2. Click "Open Twitter" below to open the compose window<br>
+        3. Attach the downloaded image to your tweet<br>
+        4. Post your response!
+      </p>
+      <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; font-style: italic;">
+        "${questionText}"
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button onclick="window.open('${twitterUrl}', '_blank')" 
+                style="background: #1da1f2; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+          🐦 Open Twitter
+        </button>
+        <button onclick="document.getElementById('twitterModal').remove()" 
+                style="background: #666; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+          Close
+        </button>
+      </div>
+    `;
+    
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
+  }
+
   // Render individual submission
   renderSubmission(submission) {
     let contentHtml = '';
@@ -375,9 +625,10 @@ class AdminPanel {
       `;
     }
     
-    // Add "Add to Hall of Fame" button for drawings
-    const hallOfFameButton = submission.type === 'drawing' ? 
-      `<button class="halloffame-btn" onclick="adminPanel.addToHallOfFame('${submission.firebaseId}')">Add to Hall of Fame</button>` : '';
+    // Add Twitter button for questions and "Add to Hall of Fame" button for drawings
+    const actionButtons = submission.type === 'question' ? 
+      `<button class="twitter-btn" onclick="adminPanel.generateTwitterPost('${submission.firebaseId}', '${this.escapeHtml(submission.content).replace(/'/g, '\\\'').replace(/"/g, '&quot;')}')">📱 Post to X</button>` :
+      `<button class="halloffame-btn" onclick="adminPanel.addToHallOfFame('${submission.firebaseId}')">Add to Hall of Fame</button>`;
     
     return `
       <div class="submission-item">
@@ -387,7 +638,7 @@ class AdminPanel {
           </div>
           <div>
             <span class="submission-timestamp">${submission.timestamp}</span>
-            ${hallOfFameButton}
+            ${actionButtons}
             <button class="delete-btn" onclick="adminPanel.deleteSubmission('${submission.firebaseId}')">Delete</button>
           </div>
         </div>

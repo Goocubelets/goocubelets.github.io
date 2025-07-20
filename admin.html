@@ -51,7 +51,6 @@
             <h2 align="center">Articles</h2>
             <h2 align="center">Archives</h2>
             <h2 align="center">Reviews</h2>
-            <h2 align="center"><a href="halloffame.html" style="color: inherit; text-decoration: none;">Hall of Fame</a></h2>
         </div>
     </div>
     
@@ -87,7 +86,8 @@
 
             <!-- Admin Content -->
             <div class="admin-content" id="adminContent">
-                <div class="admin-tabs">
+                <!-- Tab Navigation -->
+                <div class="tab-navigation">
                     <button class="tab-btn active" onclick="adminPanel.showTab('submissions')">Submissions</button>
                     <button class="tab-btn" onclick="adminPanel.showTab('halloffame')">Hall of Fame</button>
                 </div>
@@ -137,6 +137,8 @@
         <!-- Back to main site link -->
         <a href="index.html" class="back-link">← Back to Site</a>
     </div>
+
+    <!-- Firebase Scripts -->
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
@@ -157,7 +159,7 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
-      </script>
+    </script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="admin.js"></script>
