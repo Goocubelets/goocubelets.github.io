@@ -405,7 +405,7 @@ createQuestionImage(questionText) {
       
       // Calculate starting position
       const lineHeight = 35;
-      const startY = textAreaTop + 240;
+      const startY = textAreaTop + 100;
       const centerX = textAreaLeft + (textAreaWidth / 2);
       
       // Draw text shadow
