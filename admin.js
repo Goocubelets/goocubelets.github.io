@@ -499,41 +499,116 @@ createQuestionImage(questionText) {
   });
 }
   // Generate Twitter/X post for question
-  async generateTwitterPost(firebaseId, questionText) {
-    try {
-      console.log('Generating Twitter post for question:', questionText);
-      
-      // Create image blob
-      const imageBlob = await this.createQuestionImage(questionText);
-      
-      // Create downloadable image
-      const url = URL.createObjectURL(imageBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `question-${firebaseId}.png`;
-      
-      // Trigger download
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // Clean up URL
-      setTimeout(() => URL.revokeObjectURL(url), 100);
-      
-      // Prepare Twitter post text
-      const tweetText = `Answering an anonymous question from my site! 🤔✨\n\ngoocubelets.github.io`;
-      
-      // Create Twitter Web Intent URL
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
-      
-      // Show modal with instructions
-      this.showTwitterModal(twitterUrl, questionText);
-      
-    } catch (error) {
-      console.error('Error generating Twitter post:', error);
-      alert('Error generating Twitter post. Please try again.');
-    }
+ // Generate Twitter/X post for question with download/copy options
+async generateTwitterPost(firebaseId, questionText) {
+  try {
+    console.log('Generating Twitter post for question:', questionText);
+
+    // Create image blob
+    const imageBlob = await this.createQuestionImage(questionText);
+
+    // Create object URL
+    const imageUrl = URL.createObjectURL(imageBlob);
+
+    // Store imageBlob for clipboard use
+    this.lastImageBlob = imageBlob;
+
+    // Prepare tweet text
+    const tweetText = `Answering an anonymous question from my site! 🤔✨\n\ngoocubelets.github.io`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+
+    // Show modal with both options
+    this.showTwitterModalWithOptions(twitterUrl, questionText, imageUrl, imageBlob);
+
+  } catch (error) {
+    console.error('Error generating Twitter post:', error);
+    alert('Error generating Twitter post. Please try again.');
   }
+}
+// Modal with both Copy and Download options
+showTwitterModalWithOptions(twitterUrl, questionText, imageUrl, imageBlob) {
+  const existingModal = document.getElementById('twitterModal');
+  if (existingModal) existingModal.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'twitterModal';
+  modal.style.cssText = `
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 10000;
+  `;
+
+  const modalContent = document.createElement('div');
+  modalContent.style.cssText = `
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 520px;
+    width: 90%;
+    text-align: center;
+  `;
+
+  modalContent.innerHTML = `
+    <h3 style="color: #1da1f2;">📱 Post to Twitter/X</h3>
+    <p>
+      Choose how you'd like to share this image:<br><br>
+    </p>
+    <div style="margin: 10px 0;">
+      <button id="downloadBtn" style="margin: 5px; background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px;">
+        💾 Download Image
+      </button>
+      <button id="copyBtn" style="margin: 5px; background: #ffc107; color: black; padding: 10px 15px; border: none; border-radius: 5px;">
+        📋 Copy to Clipboard
+      </button>
+    </div>
+    <div style="background: #f8f9fa; padding: 10px; margin: 15px 0; border-radius: 5px;">
+      "${questionText}"
+    </div>
+    <div>
+      <button onclick="window.open('${twitterUrl}', '_blank')" 
+              style="background: #1da1f2; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold;">
+        🐦 Open Twitter
+      </button>
+      <button onclick="document.getElementById('twitterModal').remove()" 
+              style="margin-left: 10px; background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px;">
+        Close
+      </button>
+    </div>
+  `;
+
+  modal.appendChild(modalContent);
+  document.body.appendChild(modal);
+
+  // Setup download
+  document.getElementById('downloadBtn').onclick = () => {
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = `question-${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Setup copy to clipboard
+  document.getElementById('copyBtn').onclick = async () => {
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({ "image/png": imageBlob })
+      ]);
+      alert('Image copied to clipboard!');
+    } catch (err) {
+      console.error('Failed to copy image:', err);
+      alert('Clipboard copy failed. Try manually downloading.');
+    }
+  };
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.remove();
+  });
+}
 
   // Show Twitter posting modal with instructions
   showTwitterModal(twitterUrl, questionText) {
