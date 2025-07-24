@@ -360,26 +360,27 @@ createQuestionImage(questionText) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     
-    // Set canvas size to match quote.png dimensions
+    // Set canvas size to match quote2.png dimensions
     canvas.width = 1161;
     canvas.height = 669;
     
     // Function to render text (used for both background and fallback)
     const renderText = () => {
-      // Define the text area boundaries (same as original)
-      const textAreaLeft = 182;
-      const textAreaTop = 127;
-      const textAreaRight = 686;
-      const textAreaBottom = 551;
+      // Define the new text area boundaries with 20px margin
+      const textAreaLeft = 82 + 20;
+      const textAreaTop = 82 + 20;
+      const textAreaRight = 813 - 20;
+      const textAreaBottom = 593 - 20;
       const textAreaWidth = textAreaRight - textAreaLeft;
+      const textAreaHeight = textAreaBottom - textAreaTop;
       
-      // Text styling
+      // Text styling - white text for quote2.png
       ctx.font = 'bold 28px "Times New Roman", serif';
-      ctx.fillStyle = 'black';
+      ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
+      ctx.textBaseline = 'middle';
       
-      // Add text shadow
+      // Add text shadow for better readability
       const shadowOffsetX = 2;
       const shadowOffsetY = 2;
       
@@ -387,7 +388,7 @@ createQuestionImage(questionText) {
       const words = questionText.split(' ');
       const lines = [];
       let currentLine = '';
-      const maxWidth = textAreaWidth - 40;
+      const maxWidth = textAreaWidth;
       
       words.forEach(word => {
         const testLine = currentLine + (currentLine ? ' ' : '') + word;
@@ -403,37 +404,39 @@ createQuestionImage(questionText) {
         lines.push(currentLine);
       }
       
-      // Calculate starting position
+      // Calculate perfect center positioning
       const lineHeight = 35;
-      const startY = textAreaTop + 100;
+      const totalTextHeight = lines.length * lineHeight;
       const centerX = textAreaLeft + (textAreaWidth / 2);
+      const centerY = textAreaTop + (textAreaHeight / 2);
+      const startY = centerY - (totalTextHeight / 2) + (lineHeight / 2);
       
       // Draw text shadow
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
       lines.forEach((line, index) => {
         ctx.fillText(line, centerX + shadowOffsetX, startY + (index * lineHeight) + shadowOffsetY);
       });
       
-      // Draw main text
-      ctx.fillStyle = 'black';
+      // Draw main text in white
+      ctx.fillStyle = 'white';
       lines.forEach((line, index) => {
         ctx.fillText(line, centerX, startY + (index * lineHeight));
       });
       
-      // Add site branding
+      // Add site branding at bottom
       ctx.font = 'italic 18px "Times New Roman", serif';
-      const brandingY = textAreaBottom - 30;
+      const brandingY = textAreaBottom - 10;
       
       // Draw branding shadow
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
       ctx.fillText('goocubelets.github.io', centerX + shadowOffsetX, brandingY + shadowOffsetY);
       
-      // Draw branding text
-      ctx.fillStyle = 'black';
+      // Draw branding text in white
+      ctx.fillStyle = 'white';
       ctx.fillText('goocubelets.github.io', centerX, brandingY);
     };
     
-    // Load the quote.png background image
+    // Load the quote2.png background image
     const backgroundImg = new Image();
     
     // Set a timeout to prevent hanging on slow/failed image loads
@@ -446,15 +449,15 @@ createQuestionImage(questionText) {
       // Clear any existing content
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Create a gradient background as fallback
+      // Create a dark gradient background as fallback (to work with white text)
       const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      gradient.addColorStop(0, '#f8f9fa');
-      gradient.addColorStop(1, '#e9ecef');
+      gradient.addColorStop(0, '#2c3e50');
+      gradient.addColorStop(1, '#34495e');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       // Add a subtle border
-      ctx.strokeStyle = '#dee2e6';
+      ctx.strokeStyle = '#ecf0f1';
       ctx.lineWidth = 4;
       ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
       
@@ -488,14 +491,14 @@ createQuestionImage(questionText) {
     
     backgroundImg.onerror = () => {
       clearTimeout(imageTimeout);
-      console.error('Failed to load quote.png background image');
+      console.error('Failed to load quote2.png background image');
       createFallbackAndResolve();
     };
     
     // Try to load the image
     // Use relative path for GitHub Pages compatibility
     backgroundImg.crossOrigin = 'anonymous';
-    backgroundImg.src = './quote.png'; // Using relative path
+    backgroundImg.src = './quote2.png'; // Using quote2.png instead
   });
 }
   // Generate Twitter/X post for question
