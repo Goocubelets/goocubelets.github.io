@@ -355,6 +355,7 @@ class AdminPanel {
   }
 
 // Improved createQuestionImage function with better error handling and fallback
+// Improved createQuestionImage function with better error handling and fallback
 createQuestionImage(questionText) {
   return new Promise((resolve) => {
     const canvas = document.createElement('canvas');
@@ -407,20 +408,20 @@ createQuestionImage(questionText) {
       // Calculate perfect center positioning
       const lineHeight = 35;
       const totalTextHeight = lines.length * lineHeight;
-      const centerX = textAreaLeft + (textAreaWidth / 2);
-      const centerY = textAreaTop + (textAreaHeight / 2);
-      const startY = centerY - (totalTextHeight / 2) + (lineHeight / 2);
+      const textBoxCenterX = (textAreaLeft + textAreaRight) / 2;
+      const textBoxCenterY = (textAreaTop + textAreaBottom) / 2;
+      const startY = textBoxCenterY - (totalTextHeight / 2) + (lineHeight / 2);
       
       // Draw text shadow
       ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
       lines.forEach((line, index) => {
-        ctx.fillText(line, centerX + shadowOffsetX, startY + (index * lineHeight) + shadowOffsetY);
+        ctx.fillText(line, textBoxCenterX + shadowOffsetX, startY + (index * lineHeight) + shadowOffsetY);
       });
       
       // Draw main text in white
       ctx.fillStyle = 'white';
       lines.forEach((line, index) => {
-        ctx.fillText(line, centerX, startY + (index * lineHeight));
+        ctx.fillText(line, textBoxCenterX, startY + (index * lineHeight));
       });
       
       // Add site branding at bottom
@@ -429,11 +430,11 @@ createQuestionImage(questionText) {
       
       // Draw branding shadow
       ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.fillText('goocubelets.github.io', centerX + shadowOffsetX, brandingY + shadowOffsetY);
+      ctx.fillText('goocubelets.github.io', textBoxCenterX + shadowOffsetX, brandingY + shadowOffsetY);
       
       // Draw branding text in white
       ctx.fillStyle = 'white';
-      ctx.fillText('goocubelets.github.io', centerX, brandingY);
+      ctx.fillText('goocubelets.github.io', textBoxCenterX, brandingY);
     };
     
     // Load the quote2.png background image
@@ -474,7 +475,7 @@ createQuestionImage(questionText) {
       clearTimeout(imageTimeout);
       try {
         // Draw the background image
-        ctx.drawImage(backgroundImg, 0, 0, 1161, 669);
+        ctx.drawImage(backgroundImg, 0, 0, 900, 675);
         
         // Render text on top
         renderText();
