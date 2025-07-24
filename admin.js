@@ -361,8 +361,8 @@ createQuestionImage(questionText) {
     const ctx = canvas.getContext('2d');
     
     // Set canvas size to match quote2.png dimensions
-    canvas.width = 1161;
-    canvas.height = 669;
+    canvas.width = 900;
+    canvas.height = 675;
     
     // Function to render text (used for both background and fallback)
     const renderText = () => {
