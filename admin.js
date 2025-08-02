@@ -354,8 +354,7 @@ class AdminPanel {
     halloffameList.innerHTML = halloffameItems.map(item => this.renderHallOfFameItem(item)).join('');
   }
 
-// Improved createQuestionImage function with better error handling and fallback
-// Improved createQuestionImage function with better error handling and fallback
+// Improved createQuestionImage function with IM Fell English font
 createQuestionImage(questionText) {
   return new Promise((resolve) => {
     const canvas = document.createElement('canvas');
@@ -375,8 +374,8 @@ createQuestionImage(questionText) {
       const textAreaWidth = textAreaRight - textAreaLeft;
       const textAreaHeight = textAreaBottom - textAreaTop;
       
-      // Text styling - white text for quote2.png
-      ctx.font = 'bold 28px "Times New Roman", serif';
+      // Text styling - white text with IM Fell English font
+      ctx.font = 'bold 28px "IM Fell English", serif';
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -424,8 +423,8 @@ createQuestionImage(questionText) {
         ctx.fillText(line, textBoxCenterX, startY + (index * lineHeight));
       });
       
-      // Add site branding at bottom
-      ctx.font = 'italic 18px "Times New Roman", serif';
+      // Add site branding at bottom with IM Fell English font
+      ctx.font = 'italic 18px "IM Fell English", serif';
       const brandingY = textAreaBottom - 10;
       
       // Draw branding shadow
@@ -502,6 +501,7 @@ createQuestionImage(questionText) {
     backgroundImg.src = './quote2.png'; // Using quote2.png instead
   });
 }
+
   // Generate Twitter/X post for question
  // Generate Twitter/X post for question with download/copy options
 async generateTwitterPost(firebaseId, questionText) {
@@ -529,6 +529,7 @@ async generateTwitterPost(firebaseId, questionText) {
     alert('Error generating Twitter post. Please try again.');
   }
 }
+
 // Modal with both Copy and Download options
 showTwitterModalWithOptions(twitterUrl, questionText, imageUrl, imageBlob) {
   const existingModal = document.getElementById('twitterModal');
@@ -543,6 +544,7 @@ showTwitterModalWithOptions(twitterUrl, questionText, imageUrl, imageBlob) {
     background: rgba(0, 0, 0, 0.8);
     display: flex; justify-content: center; align-items: center;
     z-index: 10000;
+    font-family: 'IM Fell English', serif;
   `;
 
   const modalContent = document.createElement('div');
@@ -553,31 +555,32 @@ showTwitterModalWithOptions(twitterUrl, questionText, imageUrl, imageBlob) {
     max-width: 520px;
     width: 90%;
     text-align: center;
+    font-family: 'IM Fell English', serif;
   `;
 
   modalContent.innerHTML = `
-    <h3 style="color: #1da1f2;">📱 Post to Twitter/X</h3>
-    <p>
+    <h3 style="color: #1da1f2; font-family: 'IM Fell English', serif;">📱 Post to Twitter/X</h3>
+    <p style="font-family: 'IM Fell English', serif;">
       Choose how you'd like to share this image:<br><br>
     </p>
     <div style="margin: 10px 0;">
-      <button id="downloadBtn" style="margin: 5px; background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px;">
+      <button id="downloadBtn" style="margin: 5px; background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px; font-family: 'IM Fell English', serif;">
         💾 Download Image
       </button>
-      <button id="copyBtn" style="margin: 5px; background: #ffc107; color: black; padding: 10px 15px; border: none; border-radius: 5px;">
+      <button id="copyBtn" style="margin: 5px; background: #ffc107; color: black; padding: 10px 15px; border: none; border-radius: 5px; font-family: 'IM Fell English', serif;">
         📋 Copy to Clipboard
       </button>
     </div>
-    <div style="background: #f8f9fa; padding: 10px; margin: 15px 0; border-radius: 5px;">
+    <div style="background: #f8f9fa; padding: 10px; margin: 15px 0; border-radius: 5px; font-family: 'IM Fell English', serif;">
       "${questionText}"
     </div>
     <div>
       <button onclick="window.open('${twitterUrl}', '_blank')" 
-              style="background: #1da1f2; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold;">
+              style="background: #1da1f2; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold; font-family: 'IM Fell English', serif;">
         🐦 Open Twitter
       </button>
       <button onclick="document.getElementById('twitterModal').remove()" 
-              style="margin-left: 10px; background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px;">
+              style="margin-left: 10px; background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-family: 'IM Fell English', serif;">
         Close
       </button>
     </div>
@@ -636,6 +639,7 @@ showTwitterModalWithOptions(twitterUrl, questionText, imageUrl, imageBlob) {
       justify-content: center;
       align-items: center;
       z-index: 10000;
+      font-family: 'IM Fell English', serif;
     `;
     
     const modalContent = document.createElement('div');
@@ -646,27 +650,28 @@ showTwitterModalWithOptions(twitterUrl, questionText, imageUrl, imageBlob) {
       max-width: 500px;
       width: 90%;
       text-align: center;
+      font-family: 'IM Fell English', serif;
     `;
     
     modalContent.innerHTML = `
-      <h3 style="margin-bottom: 20px; color: #1da1f2;">📱 Post to Twitter/X</h3>
-      <p style="margin-bottom: 20px; line-height: 1.5;">
+      <h3 style="margin-bottom: 20px; color: #1da1f2; font-family: 'IM Fell English', serif;">📱 Post to Twitter/X</h3>
+      <p style="margin-bottom: 20px; line-height: 1.5; font-family: 'IM Fell English', serif;">
         <strong>Steps to post:</strong><br>
         1. The question image has been downloaded to your computer<br>
         2. Click "Open Twitter" below to open the compose window<br>
         3. Attach the downloaded image to your tweet<br>
         4. Post your response!
       </p>
-      <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; font-style: italic;">
+      <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; font-style: italic; font-family: 'IM Fell English', serif;">
         "${questionText}"
       </div>
       <div style="display: flex; gap: 10px; justify-content: center;">
         <button onclick="window.open('${twitterUrl}', '_blank')" 
-                style="background: #1da1f2; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                style="background: #1da1f2; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: 'IM Fell English', serif;">
           🐦 Open Twitter
         </button>
         <button onclick="document.getElementById('twitterModal').remove()" 
-                style="background: #666; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                style="background: #666; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-family: 'IM Fell English', serif;">
           Close
         </button>
       </div>

@@ -1,9 +1,13 @@
+/* Import IM Fell English fonts from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap');
+
 body {
   background: url("homepageback.jpg") no-repeat center center fixed; 
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
+  font-family: 'IM Fell English', serif;
 }
 
 .titleft{
@@ -25,7 +29,7 @@ body {
 .title {
   float: center;
   text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-  font-family: 'Times New Roman', serif;
+  font-family: 'IM Fell English SC', serif;
   font-size: 32pt;
   color: white;
   display: block;
@@ -58,7 +62,7 @@ body {
   border: solid;
   border-color: CornflowerBlue;
   height: 350px;
-  font-family: Fantasy;
+  font-family: 'IM Fell English', serif;
   color: white;
   margin-top: 25px;
   text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
@@ -77,6 +81,7 @@ body {
   border: solid;
   border-color: blue;
   color: white;
+  font-family: 'IM Fell English', serif;
 }
 
 .bio{
@@ -92,6 +97,7 @@ body {
   border: solid;
   border-color: blue;
   color: white;
+  font-family: 'IM Fell English', serif;
 }
 
 .right {
@@ -111,7 +117,7 @@ body {
   border: solid;
   border-color: purple;
   height: 350px;
-  font-family: Fantasy;
+  font-family: 'IM Fell English', serif;
   color: white;
   margin-top: 25px;
   text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
@@ -127,6 +133,7 @@ body {
   height: 364px;
   color: white;
   text-align: center;
+  font-family: 'IM Fell English', serif;
 }
 
 .overlay{
@@ -150,6 +157,7 @@ body {
   color: black;
   font-size: 12pt;
   line-height:1.5;
+  font-family: 'IM Fell English', serif;
 }
 .articles2{
   background-color:white;
@@ -166,6 +174,7 @@ body {
   color: black;
   font-size: 12pt;
   line-height:1.5;
+  font-family: 'IM Fell English', serif;
 }
 .center {
 padding: 125px 0;
@@ -193,7 +202,7 @@ a:hover {
   background: rgba(0, 0, 0, 0.6);
   border: 2px solid #ffffff88;
   border-radius: 12px;
-  font-family: 'Times New Roman', serif;
+  font-family: 'IM Fell English', serif;
   color: white;
   padding: 20px;
   backdrop-filter: blur(3px);
@@ -201,7 +210,7 @@ a:hover {
 
 .qa-header h1, .qa-header p,
 label, .tab, .tool-btn, .submit-btn {
-  font-family: 'Times New Roman', serif;
+  font-family: 'IM Fell English', serif;
   color: white;
   text-shadow: 0 0 3px black;
 }
@@ -220,6 +229,7 @@ label, .tab, .tool-btn, .submit-btn {
   cursor: pointer;
   color: white;
   border-bottom: 2px solid transparent;
+  font-family: 'IM Fell English', serif;
 }
 
 .tab.active {
@@ -240,12 +250,14 @@ textarea {
   background: rgba(255,255,255,0.1);
   color: white;
   border: 1px solid white;
+  font-family: 'IM Fell English', serif;
 }
 
 .submit-btn {
   background: rgba(255, 255, 255, 0.2);
   color: white;
   border: 1px solid white;
+  font-family: 'IM Fell English', serif;
 }
 
 .submit-btn:hover {
@@ -263,6 +275,7 @@ textarea {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid white;
   color: white;
+  font-family: 'IM Fell English', serif;
 }
 
 .tool-btn.active {
@@ -281,6 +294,7 @@ textarea {
   margin-bottom: 15px;
   text-align: center;
   font-weight: bold;
+  font-family: 'IM Fell English', serif;
 }
 
 .admin-link {
@@ -295,6 +309,7 @@ textarea {
   font-size: 0.9em;
   text-decoration: none;
   color: white;
+  font-family: 'IM Fell English', serif;
 }
 
 .admin-link:hover {
@@ -355,6 +370,7 @@ textarea {
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   transition: all 0.3s ease;
+  font-family: 'IM Fell English', serif;
 }
 
 .tab-btn:hover {
@@ -386,6 +402,7 @@ textarea {
   cursor: pointer;
   font-size: 12px;
   transition: all 0.3s ease;
+  font-family: 'IM Fell English', serif;
 }
 
 .halloffame-btn:hover {
@@ -405,6 +422,7 @@ textarea {
   margin-bottom: 15px;
   padding: 15px;
   transition: all 0.3s ease;
+  font-family: 'IM Fell English', serif;
 }
 
 .submission-item:hover {
@@ -427,6 +445,7 @@ textarea {
   font-size: 12px;
   font-weight: bold;
   text-transform: uppercase;
+  font-family: 'IM Fell English', serif;
 }
 
 .submission-type.question {
@@ -443,6 +462,7 @@ textarea {
   font-size: 12px;
   color: #6c757d;
   margin-right: 10px;
+  font-family: 'IM Fell English', serif;
 }
 
 /* Button group styling */
@@ -461,6 +481,7 @@ textarea {
   cursor: pointer;
   font-size: 12px;
   transition: all 0.3s ease;
+  font-family: 'IM Fell English', serif;
 }
 
 .delete-btn:hover {
@@ -492,6 +513,7 @@ textarea {
   border-left: 4px solid #007bff;
   margin-top: 10px;
   font-style: italic;
+  font-family: 'IM Fell English', serif;
 }
 
 /* No submissions message */
@@ -503,6 +525,7 @@ textarea {
   background: #f8f9fa;
   border-radius: 8px;
   border: 2px dashed #dee2e6;
+  font-family: 'IM Fell English', serif;
 }
 
 /* Submissions count styling */
@@ -510,11 +533,13 @@ textarea {
   font-size: 14px;
   color: #6c757d;
   margin-left: 10px;
+  font-family: 'IM Fell English', serif;
 }
 
 /* Enhanced clear and logout buttons */
 .clear-btn, .logout-btn {
   transition: all 0.3s ease;
+  font-family: 'IM Fell English', serif;
 }
 
 .clear-btn:hover, .logout-btn:hover {
@@ -547,7 +572,9 @@ textarea {
     margin-bottom: 2px;
     border-radius: 5px;
   }
-}.halloffame {
+}
+
+.halloffame {
   background-image: url("photo-1641895958846-19dab3471449.jpg");
   padding: 15px;
   width: 50%;
@@ -558,13 +585,14 @@ textarea {
   border: solid;
   border-color: blue;
   color: white;
-  font-family: 'Times New Roman', serif;
+  font-family: 'IM Fell English', serif;
 }
 
 .halloffame-header h1, .halloffame-header p {
   color: white;
   text-shadow: 0 0 3px black;
   margin-bottom: 10px;
+  font-family: 'IM Fell English', serif;
 }
 
 .halloffame-grid {
@@ -583,6 +611,7 @@ textarea {
   font-size: 14px;
   text-align: center;
   backdrop-filter: blur(3px);
+  font-family: 'Times New Roman', serif;
 }
 
 .halloffame-drawing {
@@ -594,9 +623,11 @@ textarea {
 .halloffame-text {
   font-style: italic;
   margin-bottom: 10px;
+  font-family: 'Times New Roman', serif;
 }
 
 .halloffame-meta {
   font-size: 12px;
   opacity: 0.8;
+  font-family: 'Times New Roman', serif;
 }
