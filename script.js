@@ -196,6 +196,71 @@ function updateUndoButton() {
 }
 
 // Drawing functions
+function floodFill(startX, startY, fillColor) {
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = imageData.data;
+  const startPos = (startY * canvas.width + startX) * 4;
+  const startR = pixels[startPos];
+  const startG = pixels[startPos + 1];
+  const startB = pixels[startPos + 2];
+  const startA = pixels[startPos + 3];
+  
+  // Convert fill color to RGB
+  const fillR = parseInt(fillColor.slice(1, 3), 16);
+  const fillG = parseInt(fillColor.slice(3, 5), 16);
+  const fillB = parseInt(fillColor.slice(5, 7), 16);
+  
+  // Don't fill if clicking on the same color
+  if (startR === fillR && startG === fillG && startB === fillB) return;
+  
+  // Tolerance for color matching (helps with anti-aliasing)
+  const tolerance = 30;
+  
+  // Helper function to check if colors match within tolerance
+  function colorMatch(r, g, b, a) {
+    return Math.abs(r - startR) <= tolerance &&
+           Math.abs(g - startG) <= tolerance &&
+           Math.abs(b - startB) <= tolerance &&
+           Math.abs(a - startA) <= tolerance;
+  }
+  
+  const pixelsToCheck = [startX, startY];
+  const width = canvas.width;
+  const height = canvas.height;
+  const visited = new Set();
+  
+  while (pixelsToCheck.length > 0) {
+    const y = pixelsToCheck.pop();
+    const x = pixelsToCheck.pop();
+    
+    const currentPos = (y * width + x) * 4;
+    const key = `${x},${y}`;
+    
+    if (x < 0 || y < 0 || x >= width || y >= height || visited.has(key)) continue;
+    
+    const r = pixels[currentPos];
+    const g = pixels[currentPos + 1];
+    const b = pixels[currentPos + 2];
+    const a = pixels[currentPos + 3];
+    
+    if (colorMatch(r, g, b, a)) {
+      visited.add(key);
+      pixels[currentPos] = fillR;
+      pixels[currentPos + 1] = fillG;
+      pixels[currentPos + 2] = fillB;
+      pixels[currentPos + 3] = 255;
+      
+      pixelsToCheck.push(x + 1, y);
+      pixelsToCheck.push(x - 1, y);
+      pixelsToCheck.push(x, y + 1);
+      pixelsToCheck.push(x, y - 1);
+    }
+  }
+  
+  ctx.putImageData(imageData, 0, 0);
+  saveState();
+}
+
 function draw(e) {
   if (!isDrawing || !canvas) return;
   const rect = canvas.getBoundingClientRect();
@@ -211,8 +276,9 @@ function draw(e) {
   if (currentTool === 'brush') {
     ctx.globalCompositeOperation = 'source-over';
     ctx.strokeStyle = colorPicker ? colorPicker.value : '#000000';
-  } else {
-    ctx.globalCompositeOperation = 'destination-out';
+  } else if (currentTool === 'eraser') {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = '#FFFFFF';
   }
 
   ctx.lineWidth = brushSize ? brushSize.value : 3;
@@ -224,10 +290,23 @@ function draw(e) {
 
 function startDrawing(e) {
   if (!canvas) return;
-  isDrawing = true;
+  
   const rect = canvas.getBoundingClientRect();
-  lastX = (e.clientX - rect.left) * (canvas.width / rect.width);
-  lastY = (e.clientY - rect.top) * (canvas.height / rect.height);
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const x = Math.floor((e.clientX - rect.left) * scaleX);
+  const y = Math.floor((e.clientY - rect.top) * scaleY);
+  
+  // Handle paint bucket tool
+  if (currentTool === 'bucket') {
+    const fillColor = colorPicker ? colorPicker.value : '#000000';
+    floodFill(x, y, fillColor);
+    return;
+  }
+  
+  isDrawing = true;
+  lastX = (e.clientX - rect.left) * scaleX;
+  lastY = (e.clientY - rect.top) * scaleY;
 }
 
 function stopDrawing() {
@@ -244,23 +323,37 @@ if (canvas) {
   canvas.addEventListener('mouseup', stopDrawing);
   canvas.addEventListener('mouseout', stopDrawing);
 
-  // Touch events for mobile
+  // Touch events for mobile - prevent scrolling
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
+    e.stopPropagation();
     const touch = e.touches[0];
-    canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: touch.clientX, clientY: touch.clientY }));
-  });
+    const rect = canvas.getBoundingClientRect();
+    const mouseEvent = new MouseEvent('mousedown', { 
+      clientX: touch.clientX, 
+      clientY: touch.clientY,
+      bubbles: true
+    });
+    canvas.dispatchEvent(mouseEvent);
+  }, { passive: false });
 
   canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
+    e.stopPropagation();
     const touch = e.touches[0];
-    canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: touch.clientX, clientY: touch.clientY }));
-  });
+    const mouseEvent = new MouseEvent('mousemove', { 
+      clientX: touch.clientX, 
+      clientY: touch.clientY,
+      bubbles: true
+    });
+    canvas.dispatchEvent(mouseEvent);
+  }, { passive: false });
 
   canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
-    canvas.dispatchEvent(new MouseEvent('mouseup'));
-  });
+    e.stopPropagation();
+    canvas.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+  }, { passive: false });
 }
 
 // Tool management
