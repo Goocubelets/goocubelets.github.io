@@ -214,7 +214,7 @@ function floodFill(startX, startY, fillColor) {
   if (startR === fillR && startG === fillG && startB === fillB) return;
   
   // Tolerance for color matching (helps with anti-aliasing)
-  const tolerance = 30;
+  const tolerance = 50;
   
   // Helper function to check if colors match within tolerance
   function colorMatch(r, g, b, a) {
